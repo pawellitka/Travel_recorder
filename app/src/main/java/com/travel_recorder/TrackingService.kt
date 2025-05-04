@@ -36,7 +36,7 @@ class TrackingService : Service() {
                 startForeground(1, it.build())
             }
         LocationServices.getFusedLocationProviderClient(applicationContext).requestLocationUpdates(
-            LocationRequest.Builder(TRACKING_INTERVAL).setMinUpdateDistanceMeters(10.0F).build(),
+            LocationRequest.Builder(TRACKING_INTERVAL).setMinUpdateDistanceMeters(0.0F).build(),
             callback,
             Looper.getMainLooper()
         )
@@ -58,13 +58,9 @@ class TrackingService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     companion object {
         const val START_ACTION = "START_ACTION"
         const val STOP_ACTION = "STOP_ACTION"
-        const val TRACKING_INTERVAL : Long = 3000000
+        const val TRACKING_INTERVAL : Long = 120000
     }
 }

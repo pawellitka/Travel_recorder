@@ -34,8 +34,7 @@ class GoogleMapViewModel(private val application: Application) : AndroidViewMode
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     public fun setShownTrack(name: String?) {
-        if(gmap == null)
-            return
+        gmap ?: return
         track = name
 
         gmap?.setMapType(GoogleMap.MAP_TYPE_HYBRID)

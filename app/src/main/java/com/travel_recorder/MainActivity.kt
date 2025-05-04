@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
         setDecorFitsSystemWindows(window, true)
         setContentView(R.layout.activity_main)
         val myComposeContent: @Composable () -> Unit = {
-            if(gmapViewModel == null) {
+            gmapViewModel ?: let {
                 gmapViewModel = viewModel<GoogleMapViewModel>(
                     factory = object : ViewModelProvider.Factory {
                         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -113,7 +113,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                 DropdownMenuItem(
                                     text = {
                                         if (!(gmapViewModel!!.startedTracking)) {
-                                            Text(stringResource(R.string.start_tracking))
+                                            gmapViewModel?.track?.let {
+                                                Text(stringResource(R.string.reset))
+                                            } ?: run {
+                                                Text(stringResource(R.string.start_tracking))
+                                            }
                                         } else if (gmapViewModel!!.isTracking) {
                                             Text(stringResource(R.string.stop_tracking))
                                         } else {
@@ -129,13 +133,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                             }
                                             gmapViewModel!!.isTracking = false
                                         } else {
-                                            if(!gmapViewModel!!.isTracking) {
-                                                if (launchTracking()) {
-                                                    gmapViewModel!!.isTracking = true
-                                                    gmapViewModel!!.startedTracking = true
-                                                    launchService()
-                                                    gmapViewModel?.setShownTrack(gmapViewModel?.track)
-                                                }
+                                            if (launchTracking()) {
+                                                gmapViewModel!!.isTracking = true
+                                                gmapViewModel!!.startedTracking = true
+                                                launchService()
+                                                gmapViewModel?.setShownTrack(null)
                                             }
                                         }
                                     },
@@ -154,6 +156,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                     onClick = dropUnlessResumed(lifecycleOwner) {
                                         loadChoice = true
                                         showMenu = false
+                                        gmapViewModel!!.isTracking = false
+                                        gmapViewModel!!.startedTracking = false
                                     },
                                 )
                                 if(gmapViewModel!!.startedTracking) {
@@ -161,6 +165,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                         text = { Text(stringResource(R.string.reset)) },
                                         onClick = dropUnlessResumed(lifecycleOwner) {
                                             dataBase.resetTravel()
+                                            gmapViewModel?.setShownTrack(null)
                                             showMenu = false
                                             gmapViewModel!!.isTracking = false
                                             gmapViewModel!!.startedTracking = false
