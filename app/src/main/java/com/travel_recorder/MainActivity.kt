@@ -49,10 +49,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.travel_recorder.ui.theme.TravelRecorderTheme
+import java.time.Instant
+import java.time.temporal.ChronoField
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
     private val dataBase = Database(this, null)
@@ -113,11 +119,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                 DropdownMenuItem(
                                     text = {
                                         if (!(gmapViewModel!!.startedTracking)) {
-                                            gmapViewModel?.track?.let {
-                                                Text(stringResource(R.string.reset))
-                                            } ?: run {
-                                                Text(stringResource(R.string.start_tracking))
-                                            }
+                                            Text(stringResource(R.string.start_tracking))
                                         } else if (gmapViewModel!!.isTracking) {
                                             Text(stringResource(R.string.stop_tracking))
                                         } else {
@@ -136,42 +138,49 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                             if (launchTracking()) {
                                                 gmapViewModel!!.isTracking = true
                                                 gmapViewModel!!.startedTracking = true
+
+                                                val cancellationTokenSource = CancellationTokenSource()
+                                                LocationServices.getFusedLocationProviderClient(application)
+                                                    .getCurrentLocation(
+                                                        Priority.PRIORITY_HIGH_ACCURACY,
+                                                        cancellationTokenSource.token
+                                                    )
+                                                    .addOnSuccessListener { location ->
+                                                        dataBase.saveLocation(location.latitude, location.longitude)
+                                                        gmapViewModel?.setShownTrack(gmapViewModel?.track)
+                                                        cancellationTokenSource.cancel()
+                                                    }
                                                 launchService()
-                                                gmapViewModel?.setShownTrack(null)
                                             }
                                         }
                                     },
                                 )
-                                if (gmapViewModel!!.startedTracking) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.save)) },
-                                        onClick = dropUnlessResumed(lifecycleOwner) {
-                                            saving()
-                                            showMenu = false
-                                        },
-                                    )
-                                }
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.save)) },
+                                    onClick = dropUnlessResumed(lifecycleOwner) {
+                                        saving()
+                                        showMenu = false
+                                    },
+                                )
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.load)) },
                                     onClick = dropUnlessResumed(lifecycleOwner) {
                                         loadChoice = true
                                         showMenu = false
                                         gmapViewModel!!.isTracking = false
+                                        gmapViewModel!!.startedTracking = true
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.reset)) },
+                                    onClick = dropUnlessResumed(lifecycleOwner) {
+                                        dataBase.resetTravel()
+                                        gmapViewModel?.setShownTrack(null)
+                                        showMenu = false
+                                        gmapViewModel!!.isTracking = false
                                         gmapViewModel!!.startedTracking = false
                                     },
                                 )
-                                if(gmapViewModel!!.startedTracking) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.reset)) },
-                                        onClick = dropUnlessResumed(lifecycleOwner) {
-                                            dataBase.resetTravel()
-                                            gmapViewModel?.setShownTrack(null)
-                                            showMenu = false
-                                            gmapViewModel!!.isTracking = false
-                                            gmapViewModel!!.startedTracking = false
-                                        },
-                                    )
-                                }
                             }
                         }
                     }
@@ -201,6 +210,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                                     modifier = Modifier
                                                         .clickable {
                                                             loadChoice = false
+                                                            dataBase.resetTravel()
                                                             gmapViewModel?.setShownTrack(label)
                                                         }
                                                         .height(50.dp)
@@ -261,7 +271,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                         }
                     }
                     if(!nameAlreadyPresent)
-                        dataBase.saveTravel(input.text.toString())
+                        dataBase.saveTravel(input.text.toString(), gmapViewModel?.track)
                     else {
                         AlertDialog.Builder(this).create().apply {
                             this.setMessage(applicationContext.resources.getString(R.string.saving_not_finalized_warning))

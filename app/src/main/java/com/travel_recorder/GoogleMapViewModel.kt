@@ -44,51 +44,19 @@ class GoogleMapViewModel(private val application: Application) : AndroidViewMode
         gmap?.uiSettings?.isZoomControlsEnabled = true
         gmap?.clear()
         val polylineOptions = PolylineOptions()
-        if(track != null) {
-            Database(application, null).loadTravel(track!!).run {
-                this.use {
-                    if (this.moveToFirst()) {
-                        var lat = this.getDouble(this.getColumnIndexOrThrow(Database.LAT_COLUMN))
-                        var lon = this.getDouble(this.getColumnIndexOrThrow(Database.LON_COLUMN))
+        println(track)
+        Database(application, null).loadTravel(track).run {
+            this.use {
+                if (this.moveToFirst()) {
+                    do {
+                        val lat = this.getDouble(this.getColumnIndexOrThrow(Database.LAT_COLUMN))
+                        val lon = this.getDouble(this.getColumnIndexOrThrow(Database.LON_COLUMN))
                         polylineOptions.add(LatLng(lat, lon))
                         cameraSetting(lat, lon)
-                        if(this.moveToNext()) {
-                            do {
-                                lat = this.getDouble(this.getColumnIndexOrThrow(Database.LAT_COLUMN))
-                                lon = this.getDouble(this.getColumnIndexOrThrow(Database.LON_COLUMN))
-                                polylineOptions.add(LatLng(lat, lon))
-                                addMarker(lat, lon, this.getLong(this.getColumnIndexOrThrow(Database.TIME_COLUMN)))
-                            } while (this.moveToNext())
-                        }
-                    }
+                        addMarker(lat, lon, this.getLong(this.getColumnIndexOrThrow(Database.TIME_COLUMN)))
+                    } while (this.moveToNext())
                 }
             }
-        } else {
-            Database(application, null).loadNewLocations().run {
-                this.use {
-                    if(this.moveToNext()) {
-                        do {
-                            val lat = this.getDouble(this.getColumnIndexOrThrow(Database.LAT_COLUMN))
-                            val lon = this.getDouble(this.getColumnIndexOrThrow(Database.LON_COLUMN))
-                            polylineOptions.add(LatLng(lat, lon))
-                            addMarker(lat, lon, this.getLong(this.getColumnIndexOrThrow(Database.TIME_COLUMN)))
-                        } while (this.moveToNext())
-                    }
-                }
-            }
-            val cancelationTokenSource = CancellationTokenSource()
-            LocationServices.getFusedLocationProviderClient(application)
-                .getCurrentLocation(
-                    Priority.PRIORITY_HIGH_ACCURACY,
-                    cancelationTokenSource.token
-                )
-                .addOnSuccessListener { location ->
-                    cameraSetting(location.latitude, location.longitude)
-                    addMarker(location.latitude, location.longitude, Instant.now().getLong(
-                        ChronoField.INSTANT_SECONDS))
-                    polylineOptions.add(LatLng(location.latitude, location.longitude))
-                    cancelationTokenSource.cancel()
-                }
         }
         polylineOptions.color(R.color.white)
         polylineOptions.width(20f)

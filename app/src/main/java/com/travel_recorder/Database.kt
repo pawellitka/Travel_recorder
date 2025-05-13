@@ -54,9 +54,9 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return readableDatabase.rawQuery("SELECT $NAME_COLUMN FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN = ?", arrayOf(travelName))
     }
 
-    fun saveTravel(name : String?) {
+    fun saveTravel(targetName : String?, sourceName : String?) {
         val deleteQuery = """
-            UPDATE $TRAVEL_TABLE_NAME SET $NAME_COLUMN = "$name" WHERE $NAME_COLUMN IS NULL
+            UPDATE $TRAVEL_TABLE_NAME SET $NAME_COLUMN = "$targetName" WHERE $NAME_COLUMN = "$sourceName" OR $NAME_COLUMN IS NULL
         """.trimIndent()
         writableDatabase.use { dataBase ->
             dataBase.execSQL(deleteQuery)
@@ -67,11 +67,10 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         return readableDatabase.rawQuery("SELECT $NAME_COLUMN FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN IS NOT NULL GROUP BY $NAME_COLUMN", null)
     }
 
-    fun loadTravel(travelName : String): Cursor {
-        return readableDatabase.rawQuery("SELECT * FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN = ? ORDER BY $TIME_COLUMN ASC", arrayOf(travelName))
-    }
-
-    fun loadNewLocations(): Cursor {
+    fun loadTravel(travelName : String?): Cursor {
+        travelName?.let {
+            return readableDatabase.rawQuery("SELECT * FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN = ? OR $NAME_COLUMN IS NULL ORDER BY $TIME_COLUMN ASC", arrayOf(travelName))
+        }
         return readableDatabase.rawQuery("SELECT * FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN IS NULL ORDER BY $TIME_COLUMN ASC", null)
     }
 
