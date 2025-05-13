@@ -54,11 +54,8 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.travel_recorder.ui.theme.TravelRecorderTheme
-import java.time.Instant
-import java.time.temporal.ChronoField
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
     private val dataBase = Database(this, null)
@@ -91,7 +88,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                 gmapViewModel = viewModel<GoogleMapViewModel>(
                     factory = object : ViewModelProvider.Factory {
                         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                            return GoogleMapViewModel(application) as T
+                            return GoogleMapViewModel(application, this@MainActivity) as T
                         }
                     }
                 )

@@ -3,22 +3,25 @@ package com.travel_recorder
 import android.Manifest
 import android.app.Service
 import android.content.Intent
+import android.location.Location
 import android.os.IBinder
 import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 
-class TrackingService : Service() {
+class TrackingService() : Service() {
     private val dataBase = Database(this, null)
     private var callback : LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
             locationResult.locations.lastOrNull()?.let { location ->
                 dataBase.saveLocation(location.latitude, location.longitude)
+                recordedLocation.postValue(location)
             }
         }
     }
@@ -62,5 +65,6 @@ class TrackingService : Service() {
         const val START_ACTION = "START_ACTION"
         const val STOP_ACTION = "STOP_ACTION"
         const val TRACKING_INTERVAL : Long = 120000
+        val recordedLocation = MutableLiveData<Location>()
     }
 }
