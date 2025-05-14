@@ -32,7 +32,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -60,7 +62,8 @@ import com.travel_recorder.ui.theme.TravelRecorderTheme
 class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
     private val dataBase = Database(this, null)
     private var gmapViewModel : GoogleMapViewModel? = null
-    private var permissionRequest: ActivityResultLauncher<String> = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+    var toggleRecomposing by mutableStateOf(false)
+    private var permissionRequest : ActivityResultLauncher<String> = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if(!isGranted)
             AlertDialog.Builder(this).create().also {
                 it.setMessage(applicationContext.resources.getString(R.string.missing_permission_warning))
@@ -96,6 +99,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
             if(permissionsCheck())
                 gmapViewModel?.setShownTrack(gmapViewModel?.track)
             var loadChoice by rememberSaveable { mutableStateOf(false) }
+            var removalMenu by remember { mutableStateOf(false) }
+            LaunchedEffect(toggleRecomposing) {}
             TravelRecorderTheme {
                 CenterAlignedTopAppBar (
                     title = { Text(stringResource(id = R.string.app_name)) },
@@ -152,22 +157,41 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                         }
                                     },
                                 )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.save)) },
-                                    onClick = dropUnlessResumed(lifecycleOwner) {
-                                        saving()
-                                        showMenu = false
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.load)) },
-                                    onClick = dropUnlessResumed(lifecycleOwner) {
-                                        loadChoice = true
-                                        showMenu = false
-                                        gmapViewModel!!.isTracking = false
-                                        gmapViewModel!!.startedTracking = true
-                                    },
-                                )
+                                if (gmapViewModel!!.startedTracking) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.save)) },
+                                        onClick = dropUnlessResumed(lifecycleOwner) {
+                                            saving()
+                                            showMenu = false
+                                        },
+                                    )
+                                }
+                                dataBase.loadNames().run {
+                                    this.use {
+                                        if (this.moveToFirst()) {
+                                            DropdownMenuItem(
+                                                text = { Text(stringResource(R.string.load)) },
+                                                onClick = dropUnlessResumed(lifecycleOwner) {
+                                                    loadChoice = true
+                                                    showMenu = false
+                                                    removalMenu = false
+                                                    gmapViewModel!!.isTracking = false
+                                                    gmapViewModel!!.startedTracking = true
+                                                },
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text(stringResource(R.string.delete)) },
+                                                onClick = dropUnlessResumed(lifecycleOwner) {
+                                                    loadChoice = true
+                                                    showMenu = false
+                                                    removalMenu = true
+                                                    gmapViewModel!!.isTracking = false
+                                                    gmapViewModel!!.startedTracking = true
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.reset)) },
                                     onClick = dropUnlessResumed(lifecycleOwner) {
@@ -194,7 +218,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                     this.use {
                                         if (this.moveToFirst()) {
                                             do {
-                                                val label = this.getString(this.getColumnIndexOrThrow(Database.NAME_COLUMN))
+                                                val label = this.getString(
+                                                    this.getColumnIndexOrThrow(Database.NAME_COLUMN)
+                                                )
                                                 Text(
                                                     text = this.getString(
                                                         this.getColumnIndexOrThrow(
@@ -206,9 +232,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                                                     overflow = TextOverflow.Ellipsis,
                                                     modifier = Modifier
                                                         .clickable {
-                                                            loadChoice = false
-                                                            dataBase.resetTravel()
-                                                            gmapViewModel?.setShownTrack(label)
+                                                            if (removalMenu) {
+                                                                removing(label)
+                                                            } else {
+                                                                loadChoice = false
+                                                                dataBase.resetTravel()
+                                                                gmapViewModel?.setShownTrack(
+                                                                    label
+                                                                )
+                                                            }
                                                         }
                                                         .height(50.dp)
                                                         .fillMaxWidth()
@@ -242,7 +274,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
 
     private fun saving() {
         var confirmed = false
-        AlertDialog.Builder(this).also {
+        AlertDialog.Builder(this@MainActivity).also {
             it.setTitle(R.string.loadChoice_title)
             val input = EditText(this).apply {
                 this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_CLASS_TEXT
@@ -276,6 +308,27 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
                             this.show()
                         }
                     }
+                }
+            }
+            it.show()
+        }
+    }
+
+    private fun removing(trackName : String) {
+        var confirmed = false
+        AlertDialog.Builder(this@MainActivity).also {
+            it.setTitle(String.format(getResources().getString(R.string.delete_warning), trackName))
+            it.setPositiveButton(R.string.ok) { _, _ ->
+                confirmed = true
+            }
+            it.setNegativeButton(R.string.cancel) { dialog, _ ->
+                confirmed = false
+                dialog.cancel()
+            }
+            it.setOnDismissListener {
+                if(confirmed) {
+                    dataBase.deleteTravel(trackName)
+                    toggleRecomposing = !toggleRecomposing
                 }
             }
             it.show()

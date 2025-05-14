@@ -5,12 +5,14 @@
     <string name="stop_tracking">Stop tracking</string>
     <string name="save">Save</string>
     <string name="load">Load</string>
+    <string name="delete">Delete recorded</string>
     <string name="reset">Reset</string>
     <string name="options">Options</string>
     <string name="saving_title">Saved travels</string>
     <string name="loadChoice_title">Recorded travels</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="delete_warning">Are you sure that track named \'%s\' should be deleted?</string>
     <string name="missing_permission_warning">Without permission tracking cannot start.</string>
     <string name="saving_not_finalized_warning">This name already exists. Saving not finalized.</string>
     <string name="notification">Tracking location</string>

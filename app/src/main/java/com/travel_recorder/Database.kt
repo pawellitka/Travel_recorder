@@ -50,6 +50,15 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
     }
 
+    fun deleteTravel(travelName : String) {
+        val deleteQuery = """
+            DELETE FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN = "$travelName"
+        """.trimIndent()
+        writableDatabase.use { dataBase ->
+            dataBase.execSQL(deleteQuery)
+        }
+    }
+
     fun checkName(travelName : String): Cursor {
         return readableDatabase.rawQuery("SELECT $NAME_COLUMN FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN = ?", arrayOf(travelName))
     }
