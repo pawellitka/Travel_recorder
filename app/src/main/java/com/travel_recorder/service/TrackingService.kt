@@ -1,7 +1,8 @@
-package com.travel_recorder
+package com.travel_recorder.service
 
 import android.Manifest
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.IBinder
@@ -13,6 +14,23 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.travel_recorder.ui_src.DataStoreManager
+import com.travel_recorder.database.Database
+import com.travel_recorder.R
+
+fun launchService(context : Context) {
+    Intent(context, TrackingService::class.java).also {
+        it.action = TrackingService.START_ACTION
+        context.startService(it)
+    }
+}
+
+fun endService(context : Context) {
+    Intent(context, TrackingService::class.java).also {
+        it.action = TrackingService.STOP_ACTION
+        context.startService(it)
+    }
+}
 
 class TrackingService() : Service() {
     private val dataBase = Database(this, null)
@@ -22,12 +40,22 @@ class TrackingService() : Service() {
             locationResult.locations.lastOrNull()?.let { location ->
                 dataBase.saveLocation(location.latitude, location.longitude)
                 recordedLocation.postValue(location)
+                println("hhhhhhhhhhhhhhhhhhhhhhhhh")
             }
         }
     }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
+    }
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun startingServiceCallback(interval : Long) {
+        LocationServices.getFusedLocationProviderClient(applicationContext).requestLocationUpdates(
+            LocationRequest.Builder(60000).setMinUpdateDistanceMeters(0.0F).build(),
+            callback,
+            Looper.getMainLooper()
+        )
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -38,11 +66,7 @@ class TrackingService() : Service() {
             .setOngoing(true).also {
                 startForeground(1, it.build())
             }
-        LocationServices.getFusedLocationProviderClient(applicationContext).requestLocationUpdates(
-            LocationRequest.Builder(TRACKING_INTERVAL).setMinUpdateDistanceMeters(0.0F).build(),
-            callback,
-            Looper.getMainLooper()
-        )
+        DataStoreManager(applicationContext).getIntervalWithCallback(::startingServiceCallback)
     }
 
     private fun stopService() {
@@ -64,7 +88,8 @@ class TrackingService() : Service() {
     companion object {
         const val START_ACTION = "START_ACTION"
         const val STOP_ACTION = "STOP_ACTION"
-        const val TRACKING_INTERVAL : Long = 120000
+        const val TRACKING_INTERVAL_UNIT_CONVERSION : Long = 60 * 1000
+        const val DEFAULT_TRACKING_INTERVAL : Long = 2 * TRACKING_INTERVAL_UNIT_CONVERSION
         val recordedLocation = MutableLiveData<Location>()
     }
 }

@@ -1,4 +1,4 @@
-package com.travel_recorder
+package com.travel_recorder.database
 
 import android.content.ContentValues
 import android.content.Context
@@ -59,7 +59,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
     }
 
-    fun checkName(travelName : String): Cursor {
+    fun checkName(travelName : String) : Cursor {
         return readableDatabase.rawQuery("SELECT $NAME_COLUMN FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN = ?", arrayOf(travelName))
     }
 
@@ -72,7 +72,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         }
     }
 
-    fun loadNames(): Cursor{
+    fun loadNames() : Cursor{
         return readableDatabase.rawQuery("SELECT $NAME_COLUMN FROM $TRAVEL_TABLE_NAME WHERE $NAME_COLUMN IS NOT NULL GROUP BY $NAME_COLUMN", null)
     }
 
