@@ -19,8 +19,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.travel_recorder.database.Database
 import com.travel_recorder.service.endService
 import com.travel_recorder.service.launchService
-import com.travel_recorder.ui_src.DataStoreManager
-import com.travel_recorder.ui_src.SettingsScreen
+import com.travel_recorder.ui_src.settingsscreen.DataStoreManager
+import com.travel_recorder.ui_src.settingsscreen.SettingsScreen
 import com.travel_recorder.ui_src.mainScreen
 import com.travel_recorder.viewmodel.GoogleMapViewModel
 

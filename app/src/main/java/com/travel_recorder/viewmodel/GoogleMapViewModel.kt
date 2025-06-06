@@ -26,7 +26,7 @@ import java.util.Date
 
 class GoogleMapViewModel(private val application: Application, private val lifecycleOwner: LifecycleOwner) : AndroidViewModel(application) {
     private var gmap: GoogleMap? = null
-    var track: String? = null
+    private var track: String? = null
     var isTracking by mutableStateOf(false)
     var startedTracking by mutableStateOf(false)
     private var polylineOptions = PolylineOptions()
@@ -35,7 +35,6 @@ class GoogleMapViewModel(private val application: Application, private val lifec
         val liveData: LiveData<Location> = TrackingService.recordedLocation
 
         liveData.observe(lifecycleOwner) { location ->
-            println("hhjttttttttttttttttt")
             addMarker(location.latitude, location.longitude, Instant.now().getLong(ChronoField.INSTANT_SECONDS))
             setShownTrack(track)
         }
@@ -49,6 +48,14 @@ class GoogleMapViewModel(private val application: Application, private val lifec
         gmap?.setIndoorEnabled(true)
         gmap?.isBuildingsEnabled = false
         gmap?.uiSettings?.isZoomControlsEnabled = true
+    }
+
+    fun setTrack(newTrack: String) {
+        track = newTrack
+    }
+
+    fun getTrack() : String? {
+        return track
     }
 
     fun setShownTrack(name: String?) {

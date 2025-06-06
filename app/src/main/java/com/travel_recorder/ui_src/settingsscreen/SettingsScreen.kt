@@ -1,4 +1,4 @@
-package com.travel_recorder.ui_src
+package com.travel_recorder.ui_src.settingsscreen
 
 import android.content.Context
 import androidx.compose.foundation.layout.Column
@@ -15,14 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.travel_recorder.R
-import com.travel_recorder.service.endService
-import com.travel_recorder.service.launchService
+import com.travel_recorder.service.restartIfRunningService
 import com.travel_recorder.ui.theme.TravelRecorderTheme
 
 suspend fun onSetInterval(interval : Long, context : Context, dataStoreManager : DataStoreManager) {
     dataStoreManager.saveInterval(interval)
-    endService(context)
-    launchService(context)
+    restartIfRunningService(context)
 }
 
 @Composable

@@ -1,5 +1,7 @@
-package com.travel_recorder.ui_src
+package com.travel_recorder.ui_src.settingsscreen
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -36,12 +38,15 @@ internal fun PreferenceSelector(
     val summaryText = stringResource(R.string.current_value_template).format(value, unit)
     val scope = rememberCoroutineScope()
 
-    PreferenceItem(
-        title = title,
-        summary = summaryText,
-        onClick = { showEdit = true },
-        modifier = modifier,
-    )
+    Column(modifier = Modifier) {
+        PreferenceItem(
+            title = title,
+            summary = summaryText,
+            onClick = { showEdit = true },
+            modifier = modifier,
+        )
+        Column(modifier = Modifier.fillMaxHeight()) {}
+    }
     if (showEdit) {
         var editValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
             mutableStateOf(TextFieldValue(value.toString()))

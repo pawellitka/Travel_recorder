@@ -14,7 +14,7 @@
     <string name="valid_range_template" translatable="false">minimum value: %1$d %2$s - maximum value %3$d %4$s</string>
     <string name="minutes">min.</string>
     <string name="back">Back</string>
-    <string name="saving_title">Saved travels</string>
+    <string name="saving_title">Name of the travel</string>
     <string name="loadChoice_title">Recorded travels</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

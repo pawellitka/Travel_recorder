@@ -8,25 +8,16 @@ import android.location.LocationManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity.LOCATION_SERVICE
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,10 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -54,6 +42,7 @@ import com.travel_recorder.R
 import com.travel_recorder.service.endService
 import com.travel_recorder.service.launchService
 import com.travel_recorder.ui.theme.TravelRecorderTheme
+import com.travel_recorder.ui_src.popups.Loading
 
 fun permissionsCheck(context : Context): Boolean {
     val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -87,7 +76,7 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
         )
     }
     if(permissionsCheck(context))
-        gmapViewModel?.setShownTrack(gmapViewModel?.track)
+        gmapViewModel?.setShownTrack(gmapViewModel?.getTrack())
     var loadChoice by rememberSaveable { mutableStateOf(false) }
     var removalMenu by remember { mutableStateOf(false) }
     LaunchedEffect(toggleRecomposing.value) {}
@@ -137,7 +126,7 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
                                             )
                                             .addOnSuccessListener { location ->
                                                 dataBase.saveLocation(location.latitude, location.longitude)
-                                                gmapViewModel?.setShownTrack(gmapViewModel?.track)
+                                                gmapViewModel?.setShownTrack(gmapViewModel?.getTrack())
                                                 cancellationTokenSource.cancel()
                                             }
                                         launchService(context)
@@ -200,63 +189,10 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
             }
         )
         if(loadChoice)
-        {
-            AlertDialog(
-                title = {
-                    Text(stringResource(R.string.loadChoice_title))
-                },
-                text = {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        dataBase.loadNames().run {
-                            this.use {
-                                if (this.moveToFirst()) {
-                                    do {
-                                        val label = this.getString(
-                                            this.getColumnIndexOrThrow(Database.NAME_COLUMN)
-                                        )
-                                        Text(
-                                            text = this.getString(
-                                                this.getColumnIndexOrThrow(
-                                                    Database.NAME_COLUMN
-                                                )
-                                            ),
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            modifier = Modifier
-                                                .clickable {
-                                                    if (removalMenu) {
-                                                        removing(label, context, dataBase) {
-                                                            toggleRecomposing.value = !toggleRecomposing.value
-                                                        }
-                                                    } else {
-                                                        loadChoice = false
-                                                        dataBase.resetTravel()
-                                                        gmapViewModel?.setShownTrack(
-                                                            label
-                                                        )
-                                                    }
-                                                }
-                                                .height(50.dp)
-                                                .fillMaxWidth()
-                                        )
-                                    } while (this.moveToNext())
-                                }
-                            }
-                        }
-                    }
-                },
-                onDismissRequest = { loadChoice = false },
-                dismissButton = {
-                    TextButton(
-                        onClick = { loadChoice = false }
-                    ) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                },
-                confirmButton = {},
-            )
-        }
+            Loading(context, dataBase, gmapViewModel, removalMenu, { loadChoice = false }) {
+                toggleRecomposing.value =
+                    !toggleRecomposing.value
+            }
     }
     return gmapViewModel
 }

@@ -1,4 +1,4 @@
-package com.travel_recorder.ui_src
+package com.travel_recorder.ui_src.settingsscreen
 
 import android.content.Context
 import androidx.compose.runtime.Composable

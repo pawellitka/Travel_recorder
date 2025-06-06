@@ -1,4 +1,4 @@
-package com.travel_recorder.ui_src
+package com.travel_recorder.ui_src.popups
 
 import android.content.Context
 import androidx.appcompat.app.AlertDialog

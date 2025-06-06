@@ -4,14 +4,16 @@ import android.content.Context
 import android.text.InputType
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.runtime.Composable
 import com.travel_recorder.R
 import com.travel_recorder.database.Database
+import com.travel_recorder.ui.theme.TravelRecorderTheme
 import com.travel_recorder.viewmodel.GoogleMapViewModel
 
 fun saving(context : Context, dataBase : Database, gmapViewModel : GoogleMapViewModel?) {
     var confirmed = false
     AlertDialog.Builder(context).also {
-        it.setTitle(R.string.loadChoice_title)
+        it.setTitle(R.string.saving_title)
         val input = EditText(context).apply {
             this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_CLASS_TEXT
             it.setView(this)
@@ -24,7 +26,7 @@ fun saving(context : Context, dataBase : Database, gmapViewModel : GoogleMapView
             dialog.cancel()
         }
         it.setOnDismissListener {
-            if(confirmed) {
+            if (confirmed) {
                 var nameAlreadyPresent = false
                 dataBase.checkName(input.text.toString()).run {
                     this.use {
@@ -35,9 +37,10 @@ fun saving(context : Context, dataBase : Database, gmapViewModel : GoogleMapView
                         }
                     }
                 }
-                if(!nameAlreadyPresent)
-                    dataBase.saveTravel(input.text.toString(), gmapViewModel?.track)
-                else {
+                if (!nameAlreadyPresent) {
+                    dataBase.saveTravel(input.text.toString(), gmapViewModel?.getTrack())
+                    gmapViewModel?.setTrack(input.text.toString())
+                } else {
                     AlertDialog.Builder(context).create().apply {
                         this.setMessage(context.resources.getString(R.string.saving_not_finalized_warning))
                         this.setCancelable(true)

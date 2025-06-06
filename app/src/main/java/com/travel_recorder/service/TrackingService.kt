@@ -14,7 +14,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.travel_recorder.ui_src.DataStoreManager
+import com.travel_recorder.ui_src.settingsscreen.DataStoreManager
 import com.travel_recorder.database.Database
 import com.travel_recorder.R
 
@@ -32,15 +32,22 @@ fun endService(context : Context) {
     }
 }
 
+fun restartIfRunningService(context : Context) {
+    Intent(context, TrackingService::class.java).also {
+        it.action = TrackingService.RESTART_IF_RUNNING_ACTION
+        context.startService(it)
+    }
+}
+
 class TrackingService() : Service() {
     private val dataBase = Database(this, null)
+    private var isServiceRunning = false
     private var callback : LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
             locationResult.locations.lastOrNull()?.let { location ->
                 dataBase.saveLocation(location.latitude, location.longitude)
                 recordedLocation.postValue(location)
-                println("hhhhhhhhhhhhhhhhhhhhhhhhh")
             }
         }
     }
@@ -60,6 +67,7 @@ class TrackingService() : Service() {
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun startService() {
+        isServiceRunning = true
         NotificationCompat.Builder(this, "tracking")
             .setContentTitle(this.resources.getString(R.string.notification))
             .setContentText("")
@@ -70,6 +78,7 @@ class TrackingService() : Service() {
     }
 
     private fun stopService() {
+        isServiceRunning = false
         LocationServices.getFusedLocationProviderClient(applicationContext).removeLocationUpdates(callback)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopForeground(STOP_FOREGROUND_DETACH)
@@ -81,6 +90,12 @@ class TrackingService() : Service() {
         when(intent?.action) {
             START_ACTION -> startService()
             STOP_ACTION -> stopService()
+            RESTART_IF_RUNNING_ACTION -> {
+                if(isServiceRunning) {
+                    startService()
+                    stopService()
+                }
+            }
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -88,7 +103,8 @@ class TrackingService() : Service() {
     companion object {
         const val START_ACTION = "START_ACTION"
         const val STOP_ACTION = "STOP_ACTION"
-        const val TRACKING_INTERVAL_UNIT_CONVERSION : Long = 60 * 1000
+        const val RESTART_IF_RUNNING_ACTION = "RESTART_IF_RUNNING_ACTION"
+        private const val TRACKING_INTERVAL_UNIT_CONVERSION : Long = 60 * 1000
         const val DEFAULT_TRACKING_INTERVAL : Long = 2 * TRACKING_INTERVAL_UNIT_CONVERSION
         val recordedLocation = MutableLiveData<Location>()
     }
