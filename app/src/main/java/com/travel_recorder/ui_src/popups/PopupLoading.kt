@@ -12,6 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,33 +41,31 @@ fun Loading(context : Context,
                     this.use {
                         if (this.moveToFirst()) {
                             do {
-                                val label = this.getString(
-                                    this.getColumnIndexOrThrow(Database.NAME_COLUMN)
-                                )
+                                val label = this.getString(this.getColumnIndexOrThrow(Database.NAME_COLUMN))
+                                var removing by remember { mutableStateOf(false) }
                                 Text(
-                                    text = this.getString(
-                                        this.getColumnIndexOrThrow(
-                                            Database.NAME_COLUMN
-                                        )
-                                    ),
+                                    text = this.getString(this.getColumnIndexOrThrow(Database.NAME_COLUMN)),
                                     style = MaterialTheme.typography.bodyLarge,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier
                                         .clickable {
                                             if (removalMenu) {
-                                                removing(label, context, dataBase, removingCallback)
+                                                removing = true
                                             } else {
                                                 closingCallback()
                                                 dataBase.resetTravel()
-                                                gmapViewModel?.setShownTrack(
-                                                    label
-                                                )
+                                                gmapViewModel?.setShownTrack(label)
                                             }
                                         }
                                         .height(50.dp)
                                         .fillMaxWidth()
                                 )
+                                if (removing)
+                                    Removing(label, context, dataBase) {
+                                        removingCallback
+                                        removing = false
+                                    }
                             } while (this.moveToNext())
                         }
                     }
@@ -72,9 +74,7 @@ fun Loading(context : Context,
         },
         onDismissRequest = closingCallback,
         dismissButton = {
-            TextButton(
-                onClick = closingCallback
-            ) {
+            TextButton(onClick = closingCallback) {
                 Text(stringResource(R.string.cancel))
             }
         },
