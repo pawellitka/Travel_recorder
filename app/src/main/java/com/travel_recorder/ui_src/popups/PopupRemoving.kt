@@ -13,7 +13,7 @@ import com.travel_recorder.database.Database
 fun Removing(trackName : String, context : Context, dataBase : Database, closingCallback: () -> (Unit)) {
     AlertDialog(
         title = {
-            Text(String.format(context.resources.getString(R.string.delete_warning), trackName))
+            Text(String.format(stringResource(R.string.delete_warning), trackName))
         },
         text = {},
         onDismissRequest = closingCallback,

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity.LOCATION_SERVICE
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -18,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -43,6 +46,7 @@ import com.travel_recorder.service.endService
 import com.travel_recorder.service.launchService
 import com.travel_recorder.ui.theme.TravelRecorderTheme
 import com.travel_recorder.ui_src.popups.Loading
+import com.travel_recorder.ui_src.popups.PopupMessage
 
 fun permissionsCheck(context : Context): Boolean {
     val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -78,7 +82,9 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
     if(permissionsCheck(context))
         gmapViewModel?.setShownTrack(gmapViewModel?.getTrack())
     var loadChoice by rememberSaveable { mutableStateOf(false) }
-    var removalMenu by remember { mutableStateOf(false) }
+    var saveChoice by rememberSaveable { mutableStateOf(false) }
+    var saveWasBlocked by rememberSaveable { mutableStateOf(false) }
+    var removalMenu by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(toggleRecomposing.value) {}
     TravelRecorderTheme {
         CenterAlignedTopAppBar (
@@ -139,7 +145,7 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.save)) },
                                 onClick = dropUnlessResumed(localLifecycleOwner) {
-                                    saving(context, dataBase, gmapViewModel)
+                                    saveChoice = true
                                     showMenu = false
                                 },
                             )
@@ -188,6 +194,15 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
                 }
             }
         )
+        if(saveChoice)
+            Saving(context, dataBase, gmapViewModel) { nameNotAvailable ->
+                saveChoice = false
+                saveWasBlocked = nameNotAvailable
+            }
+        if(saveWasBlocked)
+            PopupMessage(stringResource(R.string.saving_not_finalized_warning)) {
+                saveWasBlocked = false
+            }
         if(loadChoice)
             Loading(context, dataBase, gmapViewModel, removalMenu, { loadChoice = false }) {
                 toggleRecomposing.value =

@@ -1,34 +1,46 @@
 package com.travel_recorder.ui_src
 
 import android.content.Context
-import android.text.InputType
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import com.travel_recorder.R
 import com.travel_recorder.database.Database
-import com.travel_recorder.ui.theme.TravelRecorderTheme
 import com.travel_recorder.viewmodel.GoogleMapViewModel
 
-fun saving(context : Context, dataBase : Database, gmapViewModel : GoogleMapViewModel?) {
-    var confirmed = false
-    AlertDialog.Builder(context).also {
-        it.setTitle(R.string.saving_title)
-        val input = EditText(context).apply {
-            this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_CLASS_TEXT
-            it.setView(this)
-        }
-        it.setPositiveButton(R.string.ok) { _, _ ->
-            confirmed = true
-        }
-        it.setNegativeButton(R.string.cancel) { dialog, _ ->
-            confirmed = false
-            dialog.cancel()
-        }
-        it.setOnDismissListener {
-            if (confirmed) {
+@Composable
+fun Saving(context : Context, dataBase : Database, gmapViewModel : GoogleMapViewModel?, closingCallback: (Boolean) -> (Unit)) {
+    var nameOfSave by remember { mutableStateOf("") }
+    AlertDialog(
+        title = {
+            Text(stringResource(R.string.saving_title))
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = nameOfSave,
+                    onValueChange = { nameOfSave = it },
+                )
+            }
+        },
+        onDismissRequest = {},
+        dismissButton = {
+            TextButton(onClick = { closingCallback(false) }) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
                 var nameAlreadyPresent = false
-                dataBase.checkName(input.text.toString()).run {
+                dataBase.checkName(nameOfSave).run {
                     this.use {
                         if (this.moveToFirst()) {
                             do {
@@ -38,17 +50,13 @@ fun saving(context : Context, dataBase : Database, gmapViewModel : GoogleMapView
                     }
                 }
                 if (!nameAlreadyPresent) {
-                    dataBase.saveTravel(input.text.toString(), gmapViewModel?.getTrack())
-                    gmapViewModel?.setTrack(input.text.toString())
-                } else {
-                    AlertDialog.Builder(context).create().apply {
-                        this.setMessage(context.resources.getString(R.string.saving_not_finalized_warning))
-                        this.setCancelable(true)
-                        this.show()
-                    }
+                    dataBase.saveTravel(nameOfSave, gmapViewModel?.getTrack())
+                    gmapViewModel?.setTrack(nameOfSave)
                 }
+                closingCallback(nameAlreadyPresent)
+            }) {
+                Text(stringResource(R.string.ok))
             }
-        }
-        it.show()
-    }
+        },
+    )
 }
