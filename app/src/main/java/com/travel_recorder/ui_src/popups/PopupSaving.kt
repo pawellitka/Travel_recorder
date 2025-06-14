@@ -17,7 +17,7 @@ import com.travel_recorder.database.Database
 import com.travel_recorder.viewmodel.GoogleMapViewModel
 
 @Composable
-fun Saving(context : Context, dataBase : Database, gmapViewModel : GoogleMapViewModel?, closingCallback: (Boolean) -> (Unit)) {
+fun Saving(dataBase : Database, gmapViewModel : GoogleMapViewModel?, closingCallback: (Boolean) -> (Unit)) {
     var nameOfSave by remember { mutableStateOf("") }
     AlertDialog(
         title = {

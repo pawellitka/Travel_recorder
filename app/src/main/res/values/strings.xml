@@ -6,6 +6,7 @@
     <string name="stop_tracking">Stop tracking</string>
     <string name="save">Save</string>
     <string name="load">Load</string>
+    <string name="recorded_travels_format">%1$d, %2$s</string>
     <string name="delete">Delete recorded</string>
     <string name="reset">Reset</string>
     <string name="settings">Settings</string>
@@ -15,6 +16,7 @@
     <string name="minutes">min.</string>
     <string name="back">Back</string>
     <string name="saving_title">Name of the travel</string>
+    <string name="saving_prompt">How to call the current travel?</string>
     <string name="loadChoice_title">Recorded travels</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

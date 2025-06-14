@@ -195,7 +195,7 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
             }
         )
         if(saveChoice)
-            Saving(context, dataBase, gmapViewModel) { nameNotAvailable ->
+            Saving(dataBase, gmapViewModel) { nameNotAvailable ->
                 saveChoice = false
                 saveWasBlocked = nameNotAvailable
             }
