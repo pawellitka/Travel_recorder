@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -31,20 +32,27 @@ fun Loading(context : Context,
             removalMenu : Boolean,
             closingCallback: () -> (Unit),
             removingCallback: () -> (Unit)) {
+    val scrollState = rememberScrollState()
     AlertDialog(
         title = {
             Text(stringResource(R.string.loadChoice_title))
         },
         text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            Column(modifier = Modifier
+                .verticalColumnScrollbar(scrollState)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp)) {
+                var trackNo = 0
                 dataBase.loadNames().run {
                     this.use {
                         if (this.moveToFirst()) {
                             do {
+                                trackNo++
                                 val label = this.getString(this.getColumnIndexOrThrow(Database.NAME_COLUMN))
                                 var removing by remember { mutableStateOf(false) }
                                 Text(
-                                    text = this.getString(this.getColumnIndexOrThrow(Database.NAME_COLUMN)),
+                                    text = stringResource(R.string.recorded_travels_format)
+                                        .format(trackNo, this.getString(this.getColumnIndexOrThrow(Database.NAME_COLUMN))),
                                     style = MaterialTheme.typography.bodyLarge,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -63,7 +71,7 @@ fun Loading(context : Context,
                                 )
                                 if (removing)
                                     Removing(label, context, dataBase) {
-                                        removingCallback
+                                        removingCallback()
                                         removing = false
                                     }
                             } while (this.moveToNext())

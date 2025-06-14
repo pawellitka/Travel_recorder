@@ -59,7 +59,7 @@ class TrackingService() : Service() {
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun startingServiceCallback(interval : Long) {
         LocationServices.getFusedLocationProviderClient(applicationContext).requestLocationUpdates(
-            LocationRequest.Builder(60000).setMinUpdateDistanceMeters(0.0F).build(),
+            LocationRequest.Builder(interval).setMinUpdateDistanceMeters(0.0F).build(),
             callback,
             Looper.getMainLooper()
         )
