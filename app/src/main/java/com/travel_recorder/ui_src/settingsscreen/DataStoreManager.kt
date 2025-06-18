@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import androidx.datastore.preferences.preferencesDataStore
 import com.travel_recorder.service.TrackingService.Companion.DEFAULT_TRACKING_INTERVAL
+import com.travel_recorder.service.TrackingService.Companion.TRACKING_INTERVAL_UNIT_CONVERSION
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,9 +24,9 @@ class DataStoreManager(private val context: Context) {
         val MS_INTERVAL = longPreferencesKey("ms_interval")
     }
 
-    suspend fun saveInterval(interval: Long) {
+    suspend fun saveInterval(interval_min: Long) {
         context.dataStore.edit { preferences ->
-            preferences[MS_INTERVAL] = interval
+            preferences[MS_INTERVAL] = interval_min * TRACKING_INTERVAL_UNIT_CONVERSION
         }
     }
 
@@ -33,14 +34,13 @@ class DataStoreManager(private val context: Context) {
         val job = SupervisorJob()
         val scope = CoroutineScope(Dispatchers.IO + job)
         scope.launch {
-            val value = getInterval()
-            callback(value)
+            callback(getInterval())
         }
     }
 
     @Composable
     fun composableGetInterval() : Long {
-        return intervalFlow.collectAsState(initial = DEFAULT_TRACKING_INTERVAL).value ?: DEFAULT_TRACKING_INTERVAL
+        return (intervalFlow.collectAsState(initial = DEFAULT_TRACKING_INTERVAL).value ?: DEFAULT_TRACKING_INTERVAL) / TRACKING_INTERVAL_UNIT_CONVERSION
     }
 
     private val intervalFlow: Flow<Long?> = context.dataStore.data

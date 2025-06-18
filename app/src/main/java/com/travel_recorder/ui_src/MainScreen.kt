@@ -9,26 +9,32 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity.LOCATION_SERVICE
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -47,6 +53,8 @@ import com.travel_recorder.service.launchService
 import com.travel_recorder.ui.theme.TravelRecorderTheme
 import com.travel_recorder.ui_src.popups.Loading
 import com.travel_recorder.ui_src.popups.PopupMessage
+import kotlinx.coroutines.delay
+import androidx.compose.ui.unit.Dp
 
 fun permissionsCheck(context : Context): Boolean {
     val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
@@ -85,10 +93,46 @@ fun mainScreen(mapViewModel : GoogleMapViewModel?,
     var saveChoice by rememberSaveable { mutableStateOf(false) }
     var saveWasBlocked by rememberSaveable { mutableStateOf(false) }
     var removalMenu by rememberSaveable { mutableStateOf(false) }
+    var subtitleWidth by remember { mutableIntStateOf(0) }
+    var widthOfSubtitleField by remember { mutableIntStateOf(0) }
+    var ongoingRecordingText by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        var dotsCounter = 0
+        while (true) {
+            delay(1000L)
+            if(!gmapViewModel!!.isTracking) {
+                ongoingRecordingText = ""
+                dotsCounter = 0
+            }
+            else if (dotsCounter++ % 4 == 0)
+                ongoingRecordingText = context.getString(R.string.ongoing_recording)
+            else
+                ongoingRecordingText += "."
+        }
+    }
     LaunchedEffect(toggleRecomposing.value) {}
     TravelRecorderTheme {
         CenterAlignedTopAppBar (
-            title = { Text(stringResource(id = R.string.app_name)) },
+            title = {
+                Column(modifier = Modifier.onGloballyPositioned { coordinates ->
+                    widthOfSubtitleField = coordinates.size.width
+                }
+                ) {
+                    Text(stringResource(id = R.string.app_name))
+                    Text(
+                        ongoingRecordingText,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 10.sp,
+                        color = colorResource(id = R.color.light_green),
+                        modifier = Modifier
+                            .offset(x = Dp((widthOfSubtitleField - subtitleWidth)/(2.0f * context.resources.displayMetrics.density)))
+                            .onGloballyPositioned { layoutCoordinates ->
+                                if (subtitleWidth == 0)
+                                    subtitleWidth = layoutCoordinates.size.width
+                            }
+                    )
+                }
+            },
             actions = {
                 Box {
                     var showMenu by remember { mutableStateOf(false) }

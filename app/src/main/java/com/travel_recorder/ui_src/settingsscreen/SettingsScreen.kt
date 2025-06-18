@@ -18,8 +18,8 @@ import com.travel_recorder.R
 import com.travel_recorder.service.restartIfRunningService
 import com.travel_recorder.ui.theme.TravelRecorderTheme
 
-suspend fun onSetInterval(interval : Long, context : Context, dataStoreManager : DataStoreManager) {
-    dataStoreManager.saveInterval(interval)
+suspend fun onSetInterval(interval_min : Long, context : Context, dataStoreManager : DataStoreManager) {
+    dataStoreManager.saveInterval(interval_min)
     restartIfRunningService(context)
 }
 
