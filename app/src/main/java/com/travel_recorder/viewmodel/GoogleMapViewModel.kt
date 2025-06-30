@@ -2,8 +2,10 @@ package com.travel_recorder.viewmodel
 
 import android.Manifest
 import android.app.Application
+import android.os.SystemClock
 import android.icu.text.DateFormat.getDateTimeInstance
 import android.location.Location
+import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +32,7 @@ class GoogleMapViewModel(private val application: Application, private val lifec
     var isTracking by mutableStateOf(false)
     var startedTracking by mutableStateOf(false)
     private var polylineOptions = PolylineOptions()
+    private var previousClickTime: Long = CAMERA_FIXED_TIME_AFTER_CLICK
 
     init {
         val liveData: LiveData<Location> = TrackingService.recordedLocation
@@ -63,6 +66,16 @@ class GoogleMapViewModel(private val application: Application, private val lifec
         track = name
 
         gmap?.clear()
+        gmap?.setOnMapClickListener {
+            previousClickTime = SystemClock.elapsedRealtime()
+        }
+        gmap?.setOnCameraIdleListener {
+            previousClickTime = SystemClock.elapsedRealtime()
+        }
+        gmap?.setOnCameraMoveStartedListener { reason ->
+            if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE)
+                previousClickTime = SystemClock.elapsedRealtime()
+        }
         polylineOptions = PolylineOptions()
         polylineOptions.color(R.color.white)
         polylineOptions.width(20f)
@@ -76,7 +89,8 @@ class GoogleMapViewModel(private val application: Application, private val lifec
                         lon = this.getDouble(this.getColumnIndexOrThrow(Database.LON_COLUMN))
                         addMarker(lat, lon, this.getLong(this.getColumnIndexOrThrow(Database.TIME_COLUMN)))
                     } while (this.moveToNext())
-                    cameraSetting(lat, lon)
+                    if(SystemClock.elapsedRealtime() - previousClickTime > CAMERA_FIXED_TIME_AFTER_CLICK)
+                        cameraSetting(lat, lon)
                 }
             }
         }
@@ -96,5 +110,9 @@ class GoogleMapViewModel(private val application: Application, private val lifec
             CameraPosition.Builder().target( LatLng(latitude, longitude))
                 .zoom(18f).build()
         gmap?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    }
+
+    companion object {
+        private const val CAMERA_FIXED_TIME_AFTER_CLICK : Long = 20 * 1000
     }
 }
