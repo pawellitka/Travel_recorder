@@ -10,6 +10,7 @@
     <string name="recorded_travels_format">%1$d, %2$s</string>
     <string name="delete">Delete recorded</string>
     <string name="reset">Reset</string>
+    <string name="map_marker_template">%1$s - distance: %2$.3f km</string>
     <string name="settings">Settings</string>
     <string name="location_check_interval">Intervals between location checks</string>
     <string name="current_value_template">Current value: %1$d %2$s</string>

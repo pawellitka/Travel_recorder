@@ -1,12 +1,10 @@
 package com.travel_recorder.viewmodel
 
-import android.Manifest
 import android.app.Application
+import android.content.Context
 import android.os.SystemClock
 import android.icu.text.DateFormat.getDateTimeInstance
 import android.location.Location
-import android.widget.Toast
-import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,11 +17,10 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.maps.android.SphericalUtil
 import com.travel_recorder.database.Database
 import com.travel_recorder.R
 import com.travel_recorder.service.TrackingService
-import java.time.Instant
-import java.time.temporal.ChronoField
 import java.util.Date
 
 class GoogleMapViewModel(private val application: Application, private val lifecycleOwner: LifecycleOwner) : AndroidViewModel(application) {
@@ -37,8 +34,7 @@ class GoogleMapViewModel(private val application: Application, private val lifec
     init {
         val liveData: LiveData<Location> = TrackingService.recordedLocation
 
-        liveData.observe(lifecycleOwner) { location ->
-            addMarker(location.latitude, location.longitude, Instant.now().getLong(ChronoField.INSTANT_SECONDS))
+        liveData.observe(lifecycleOwner) {
             setShownTrack(track)
         }
     }
@@ -84,10 +80,12 @@ class GoogleMapViewModel(private val application: Application, private val lifec
         Database(application, null).loadTravel(track).run {
             this.use {
                 if (this.moveToFirst()) {
+                    val latLngList = mutableListOf<LatLng>()
                     do {
                         lat = this.getDouble(this.getColumnIndexOrThrow(Database.LAT_COLUMN))
                         lon = this.getDouble(this.getColumnIndexOrThrow(Database.LON_COLUMN))
-                        addMarker(lat, lon, this.getLong(this.getColumnIndexOrThrow(Database.TIME_COLUMN)))
+                        latLngList.add(LatLng(lat, lon))
+                        addMarker(lat, lon, this.getLong(this.getColumnIndexOrThrow(Database.TIME_COLUMN)), SphericalUtil.computeLength(latLngList), application)
                     } while (this.moveToNext())
                     if(SystemClock.elapsedRealtime() - previousClickTime > CAMERA_FIXED_TIME_AFTER_CLICK)
                         cameraSetting(lat, lon)
@@ -97,11 +95,11 @@ class GoogleMapViewModel(private val application: Application, private val lifec
         gmap!!.addPolyline(polylineOptions)
     }
 
-    private fun addMarker(latitude : Double, longitude : Double, time : Long) {
+    private fun addMarker(latitude : Double, longitude : Double, time : Long, distance : Double, context : Context) {
         polylineOptions.add(LatLng(latitude, longitude))
         val markerOptions = MarkerOptions()
         markerOptions.position(LatLng(latitude, longitude))
-        markerOptions.title(getDateTimeInstance().format(Date(time * 1000)))
+        markerOptions.title(context.getString(R.string.map_marker_template).format(getDateTimeInstance().format(Date(time * 1000)), distance / 1000))
         gmap?.addMarker(markerOptions)
     }
 
