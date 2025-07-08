@@ -3,6 +3,7 @@ package com.travel_recorder.ui_src.settingsscreen
 import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,10 +18,16 @@ import androidx.compose.ui.res.stringResource
 import com.travel_recorder.R
 import com.travel_recorder.service.restartIfRunningService
 import com.travel_recorder.ui.theme.TravelRecorderTheme
+import com.travel_recorder.web_server.KtorServer.restartServer
 
-suspend fun onSetInterval(interval_min : Long, context : Context, dataStoreManager : DataStoreManager) {
-    dataStoreManager.saveInterval(interval_min)
+suspend fun onSetInterval(intervalMin : Int, context : Context, dataStoreManager : DataStoreManager) {
+    dataStoreManager.saveInterval(intervalMin)
     restartIfRunningService(context)
+}
+
+suspend fun onSetPort(port : Int, context : Context, dataStoreManager : DataStoreManager) {
+    dataStoreManager.saveWebPort(port)
+    restartServer(context, port)
 }
 
 @Composable
@@ -37,13 +44,22 @@ fun SettingsScreen(context : Context, dataStoreManager : DataStoreManager, onBac
                 },
             )
             Surface(modifier = Modifier.fillMaxHeight()) {
-                PreferenceSelector(
-                    title = stringResource(R.string.location_check_interval),
-                    value = dataStoreManager.composableGetInterval(),
-                    stringResource(R.string.minutes),
-                    onUpdate = { onSetInterval(it.toLong(), context, dataStoreManager) },
-                    validValues = 1..360,
-                )
+                Column(modifier = Modifier) {
+                    PreferenceSelector(
+                        title = stringResource(R.string.location_check_interval),
+                        value = dataStoreManager.composableGetInterval(),
+                        stringResource(R.string.minutes),
+                        onUpdate = { onSetInterval(it, context, dataStoreManager) },
+                        validValues = 1..360,
+                    )
+                    PreferenceSelector(
+                        title = stringResource(R.string.web_interface_port),
+                        value = dataStoreManager.composableGetPort(),
+                        "",
+                        onUpdate = { onSetPort(it, context, dataStoreManager) },
+                        validValues = 0..65535,
+                    )
+                }
             }
         }
     }

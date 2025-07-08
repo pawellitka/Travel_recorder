@@ -28,7 +28,7 @@ import com.travel_recorder.R
 @Composable
 internal fun PreferenceSelector(
     title: String,
-    value: Long,
+    value: Int,
     unit : String,
     onUpdate: suspend (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -45,7 +45,6 @@ internal fun PreferenceSelector(
             onClick = { showEdit = true },
             modifier = modifier,
         )
-        Column(modifier = Modifier.fillMaxHeight()) {}
     }
     if (showEdit) {
         var editValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {

@@ -57,9 +57,9 @@ class TrackingService() : Service() {
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    private fun startingServiceCallback(interval_ms : Long) {
+    private fun startingServiceCallback(intervalMs : Int) {
         LocationServices.getFusedLocationProviderClient(applicationContext).requestLocationUpdates(
-            LocationRequest.Builder(interval_ms).setMinUpdateDistanceMeters(0.0F).build(),
+            LocationRequest.Builder(intervalMs.toLong()).setMinUpdateDistanceMeters(0.0F).build(),
             callback,
             Looper.getMainLooper()
         )
@@ -108,8 +108,8 @@ class TrackingService() : Service() {
         const val START_ACTION = "START_ACTION"
         const val STOP_ACTION = "STOP_ACTION"
         const val RESTART_IF_RUNNING_ACTION = "RESTART_IF_RUNNING_ACTION"
-        const val TRACKING_INTERVAL_UNIT_CONVERSION : Long = 60 * 1000
-        const val DEFAULT_TRACKING_INTERVAL : Long = 2 * TRACKING_INTERVAL_UNIT_CONVERSION
+        const val TRACKING_INTERVAL_UNIT_CONVERSION : Int = 60 * 1000
+        const val DEFAULT_TRACKING_INTERVAL : Int = 2 * TRACKING_INTERVAL_UNIT_CONVERSION
         val recordedLocation = MutableLiveData<Location>()
     }
 }

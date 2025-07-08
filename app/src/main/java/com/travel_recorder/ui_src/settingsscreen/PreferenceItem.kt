@@ -25,11 +25,9 @@ internal fun PreferenceItem(
         modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(start = 8.dp)
             .border(
                 width = 2.dp,
                 color = colorResource(id = R.color.brown),
-                //shape = RoundedCornerShape(8.dp)
             )
             .padding(8.dp)
     ) {
