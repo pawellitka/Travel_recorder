@@ -23,6 +23,7 @@ import com.travel_recorder.ui_src.settingsscreen.DataStoreManager
 import com.travel_recorder.ui_src.settingsscreen.SettingsScreen
 import com.travel_recorder.ui_src.mainScreen
 import com.travel_recorder.viewmodel.GoogleMapViewModel
+import com.travel_recorder.web_server.KtorServer
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
     private val dataBase = Database(this, null)
@@ -71,11 +72,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
         composeView.setContent {
             composeContent()
         }
+
+        KtorServer.start(this)
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     @Override
     override fun onMapReady(googleMap: GoogleMap) {
         gmapViewModel?.setMap(googleMap)
+    }
+
+    override fun onDestroy() {
+        KtorServer.stop()
+        super.onDestroy()
     }
 }
