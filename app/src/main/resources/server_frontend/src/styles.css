@@ -1,0 +1,83 @@
+* {
+  font-family: 'Roboto', sans-serif;
+  color: #616161;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+router-outlet + *  {
+  padding: 0px 8px;
+}
+
+/* Text */
+h1 {
+  font-size: 28px;
+}
+
+h2 {
+  font-size: 22px;
+}
+
+h1, h2, h3 {
+  font-weight: 300;
+}
+
+h3 {
+  background-color: #FFB89787;
+  padding: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 400px;
+}
+
+a {
+  cursor: pointer;
+  color: #866250;
+  padding: 0px 8px 0px 0px;
+}
+
+/* Button */
+.button, button {
+  padding: 8px 16px;
+  border-radius: 2px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #1976d2;
+}
+
+/* Button */
+.button {
+  background-color: #866250;
+  color: white;
+  cursor: pointer;
+}
+
+/* Sub list */
+li {
+  color: #866250;
+}
+
+/* Top Bar */
+app-top-bar {
+  height: 60px;
+  background-color: #866250;
+  padding: 16px;
+  align-items: center;
+  display: flex;
+}
+
+app-top-bar h1 {
+  color: white;
+}

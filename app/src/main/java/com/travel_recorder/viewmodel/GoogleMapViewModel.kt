@@ -23,7 +23,7 @@ import com.travel_recorder.R
 import com.travel_recorder.service.TrackingService
 import java.util.Date
 
-class GoogleMapViewModel(private val application: Application, private val lifecycleOwner: LifecycleOwner) : AndroidViewModel(application) {
+class GoogleMapViewModel(private val application: Application, lifecycleOwner: LifecycleOwner) : AndroidViewModel(application) {
     private var gmap: GoogleMap? = null
     private var track: String? = null
     var isTracking by mutableStateOf(false)

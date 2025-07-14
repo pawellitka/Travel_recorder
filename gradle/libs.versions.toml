@@ -8,11 +8,14 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 kotlinxCoroutinesCore = "1.6.4"
+ktorClientCio = "3.2.1"
 ktorSerializationKotlinxJson = "2.3.4"
 ktorServerCio = "2.3.4"
 ktorServerContentNegotiation = "2.3.4"
 ktorServerCore = "2.3.4"
 ktorServerHtmlBuilder = "2.3.4"
+ktorServerNetty = "3.2.1"
+ktorWebsockets = "3.2.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
@@ -30,6 +33,7 @@ appcompat = "1.7.0"
 navigationComposeJvmstubs = "2.9.0"
 navigationFragmentKtx = "2.9.0"
 navigationUiKtx = "2.9.0"
+xclientOkhttp = "3.0.0"
 
 [libraries]
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils" }
@@ -57,14 +61,17 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCio" }
 ktor-gson = { module = "io.ktor:ktor-gson" }
 ktor-ktor-server-core = { module = "io.ktor:ktor-server-core" }
+ktor-ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktorServerNetty" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktorServerCio" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktorServerContentNegotiation" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktorServerCore" }
 ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktorServerHtmlBuilder" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty" }
+ktor-websockets = { module = "io.ktor:ktor-websockets", version.ref = "ktorWebsockets" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
@@ -78,6 +85,7 @@ androidx-navigation-compose-jvmstubs = { group = "androidx.navigation", name = "
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 ui = { module = "androidx.compose.ui:ui" }
+xclient-okhttp = { module = "io.ktoktorr:-client-okhttp", version.ref = "xclientOkhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

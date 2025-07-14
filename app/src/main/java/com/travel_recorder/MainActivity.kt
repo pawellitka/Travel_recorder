@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback  {
             composeContent()
         }
 
-        KtorServer.start(this)
+        KtorServer.start(this, dataBase)
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])

@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -47,10 +49,12 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
     }
-    packagingOptions {
-        exclude("META-INF/*")
-        exclude("META-INF/licenses/*")
-        exclude("**/attach_hotspot_windows.dll")
+    packaging {
+        resources {
+            excludes += ("META-INF/*")
+            excludes += ("META-INF/licenses/*")
+            excludes += ("**/attach_hotspot_windows.dll")
+        }
     }
 }
 
@@ -82,14 +86,12 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.ui)
     implementation(libs.kotlinx.coroutines.core)
-    val ktorVersion = "1.6.2"
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-websockets:$ktorVersion")
-    testImplementation("io.ktor:ktor-websockets:$ktorVersion")
-    testImplementation("io.ktor:ktor-client-websockets:$ktorVersion")
-    testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
-    testImplementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+    implementation(libs.ktor.ktor.server.netty)
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.websockets)
+    testImplementation(libs.ktor.websockets)
+    testImplementation(libs.ktor.client.cio)
+    testImplementation(libs.xclient.okhttp)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

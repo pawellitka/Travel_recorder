@@ -7,7 +7,7 @@
     <string name="stop_tracking">Stop tracking</string>
     <string name="save">Save</string>
     <string name="load">Load</string>
-    <string name="recorded_travels_format">%1$d, %2$s</string>
+    <string name="recorded_travels_format">%1$d. %2$s</string>
     <string name="delete">Delete recorded</string>
     <string name="reset">Reset</string>
     <string name="map_marker_template">%1$s - distance: %2$.3f km</string>
@@ -28,4 +28,5 @@
     <string name="saving_not_finalized_warning">This name already exists. Saving not finalized.</string>
     <string name="notification">Tracking location</string>
     <string name="channel_name">tracking</string>
+    <string name="service_description">Travel recorder\'s tracking service</string>
 </resources>

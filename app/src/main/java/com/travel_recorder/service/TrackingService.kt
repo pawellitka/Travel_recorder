@@ -1,6 +1,8 @@
 package com.travel_recorder.service
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -14,9 +16,10 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.travel_recorder.ui_src.settingsscreen.DataStoreManager
-import com.travel_recorder.database.Database
 import com.travel_recorder.R
+import com.travel_recorder.database.Database
+import com.travel_recorder.ui_src.settingsscreen.DataStoreManager
+
 
 fun launchService(context : Context) {
     Intent(context, TrackingService::class.java).also {
@@ -67,7 +70,17 @@ class TrackingService() : Service() {
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun startService() {
-        NotificationCompat.Builder(this, "tracking")
+        val channel = NotificationChannel(
+            this.resources.getString(R.string.channel_name),
+            this.resources.getString(R.string.channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        channel.description = this.resources.getString(R.string.service_description)
+
+        val notificationManager = getSystemService<NotificationManager>(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
+
+        NotificationCompat.Builder(this, this.resources.getString(R.string.channel_name))
             .setContentTitle(this.resources.getString(R.string.notification))
             .setContentText("")
             .setOngoing(true).also {
