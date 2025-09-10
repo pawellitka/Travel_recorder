@@ -6,17 +6,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import androidx.datastore.preferences.preferencesDataStore
 import com.travel_recorder.service.TrackingService.Companion.DEFAULT_TRACKING_INTERVAL
 import com.travel_recorder.service.TrackingService.Companion.TRACKING_INTERVAL_UNIT_CONVERSION
 import com.travel_recorder.web_server.KtorServer.DEFAULT_WEB_PORT
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.net.Inet4Address
+import java.net.NetworkInterface
+import java.net.SocketException
+
 
 val Context.dataStore by preferencesDataStore(name = "settings")
 
@@ -50,6 +54,30 @@ class DataStoreManager(private val context: Context) {
     @Composable
     fun composableGetPort() : Int {
         return (getFlow(WEB_PORT).collectAsState(initial = DEFAULT_WEB_PORT).value ?: DEFAULT_WEB_PORT)
+    }
+
+    @Composable
+    fun composableGetIP() : String {
+        var retValue : String = ""
+        try {
+            val en = NetworkInterface.getNetworkInterfaces()
+            while (en.hasMoreElements()) {
+                val intf = en.nextElement()
+                val enumIpAddress = intf.inetAddresses
+                while (enumIpAddress.hasMoreElements()) {
+                    val inetAddress = enumIpAddress.nextElement()
+                    if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address && inetAddress.hostAddress != null) {
+                        if (retValue == "")
+                            retValue = inetAddress.hostAddress!!
+                        else
+                            retValue += " or " + inetAddress.hostAddress!!
+                    }
+                }
+            }
+        } catch (ex: SocketException) {
+            ex.printStackTrace()
+        }
+        return retValue
     }
 
     private fun getFlow(key : Preferences.Key<Int>) : Flow<Int?> {

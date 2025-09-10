@@ -20,6 +20,7 @@ internal fun PreferenceItem(
     summary: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    comment: String?,
 ) {
     Column(
         modifier
@@ -45,5 +46,13 @@ internal fun PreferenceItem(
             overflow = TextOverflow.Ellipsis,
             modifier = modifier,
         )
+        if(comment != null)
+            Text(
+                text = comment,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                overflow = TextOverflow.Ellipsis,
+                modifier = modifier,
+            )
     }
 }

@@ -33,6 +33,7 @@ internal fun PreferenceSelector(
     onUpdate: suspend (Int) -> Unit,
     modifier: Modifier = Modifier,
     validValues: IntRange? = null,
+    comment: String? = null,
 ) {
     var showEdit by rememberSaveable { mutableStateOf(false) }
     val summaryText = stringResource(R.string.current_value_template).format(value, unit)
@@ -44,6 +45,7 @@ internal fun PreferenceSelector(
             summary = summaryText,
             onClick = { showEdit = true },
             modifier = modifier,
+            comment = comment,
         )
     }
     if (showEdit) {

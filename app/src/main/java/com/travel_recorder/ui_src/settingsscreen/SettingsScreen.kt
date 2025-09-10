@@ -58,6 +58,7 @@ fun SettingsScreen(context : Context, dataStoreManager : DataStoreManager, onBac
                         "",
                         onUpdate = { onSetPort(it, context, dataStoreManager) },
                         validValues = 0..65535,
+                        comment = String.format(stringResource(R.string.web_interface_ip_comment), dataStoreManager.composableGetIP()),
                     )
                 }
             }
