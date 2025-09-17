@@ -1,18 +1,21 @@
 <h2>Recorded travels:</h2>
 
-  <div>
-  <h3>
-    <a>
-      gg
-    </a>
-    <a class="button">Show details</a>
-  </h3>
+@for (track of tracks; track track.trackId) {
+
+  <div (click)="toggle(track)">
+    <h3>
+      <a [name]="track.name + ' details'">
+        {{ track.name }} 
+      </a>
+	  <a class="button">Show details</a>
+    </h3>
+
+    @if (expandedTracks.has(track.trackId)) {
+      <ul>
+        @for (location of TrackDetails[track.trackId]; track location.locationId) {
+          <li>{{ location_formatting(location) }} </li>
+        }
+      </ul>
+    }
   </div>
-  <div>
-  <h3>
-    <a>
-      new
-    </a>
-    <a class="button">Show details</a>
-  </h3>
-  </div>
+}
