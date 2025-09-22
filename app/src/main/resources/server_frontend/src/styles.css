@@ -39,7 +39,6 @@ h3 {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  min-width: 400px;
 }
 
 a {
@@ -76,6 +75,7 @@ app-top-bar {
   padding: 16px;
   align-items: center;
   display: flex;
+  width: 100%;
 }
 
 app-top-bar h1 {
